@@ -3,7 +3,7 @@ import { Vector3 } from "three";
 
 // Chunk system constants
 export const CHUNK_SIZE = 16;
-export const LOAD_RADIUS = 3; // Number of chunks to load around player
+export const LOAD_RADIUS = 1; // Number of chunks to load around player (3x3 = 9 chunks, close to requested 8)
 
 interface Chunk {
   x: number; // Chunk coordinate
@@ -30,7 +30,7 @@ interface MinecraftState {
 
 export const useMinecraft = create<MinecraftState>((set, get) => ({
   loadedChunks: new Map(),
-  playerPosition: new Vector3(0, 15, 0), // Start at world origin
+  playerPosition: new Vector3(0, generateHeight(0, 0) + 2, 0), // Start at ground level + 2 blocks
   playerChunk: { x: 0, z: 0 },
   seed: 12345, // Deterministic seed for world generation
   
