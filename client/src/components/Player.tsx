@@ -96,11 +96,23 @@ export default function Player() {
     
     // Collision detection and ground constraint
     const newGroundHeight = getGroundHeight(newPosition.x, newPosition.z);
+    const currentGroundHeight = getGroundHeight(playerPosition.x, playerPosition.z);
+    
+    // Check for autojump - only if moving horizontally and block is exactly 1 block higher
+    const isMovingHorizontally = Math.abs(velocity.x) > 0.1 || Math.abs(velocity.z) > 0.1;
+    const blockHeightDifference = newGroundHeight - currentGroundHeight;
+    const canAutojump = isMovingHorizontally && isGrounded && blockHeightDifference > 0 && blockHeightDifference <= 1;
+    
+    // Trigger autojump with satisfying animation
+    if (canAutojump && velocity.y <= 0) {
+      velocity.y = jumpSpeed * 0.85; // Slightly lower jump for autojump
+      console.log("Autojump triggered!");
+    }
     
     // Keep player above ground
     if (newPosition.y < newGroundHeight + playerHalfHeight) {
       newPosition.y = newGroundHeight + playerHalfHeight;
-      velocity.y = 0; // Stop falling when hitting ground
+      velocity.y = Math.max(0, velocity.y); // Don't reset upward velocity during autojump
     }
     
     // Update position
