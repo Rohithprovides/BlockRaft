@@ -3,7 +3,7 @@ import { useMinecraft } from "../lib/stores/useMinecraft";
 
 export default function MiniMap() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { world, playerPosition } = useMinecraft();
+  const { loadedChunks, playerPosition, getHeight } = useMinecraft();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -15,41 +15,46 @@ export default function MiniMap() {
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const scale = 4; // Each block = 4 pixels
-    const mapSize = world.length * scale;
+    const scale = 2; // Each block = 2 pixels for better range coverage
+    const mapRadius = 50; // Show 100x100 area around player
+    const centerX = canvas.width / 2;
+    const centerZ = canvas.height / 2;
     
-    // Draw terrain
-    for (let x = 0; x < world.length; x++) {
-      for (let z = 0; z < world[x].length; z++) {
-        const height = world[x][z];
+    // Draw terrain around player
+    for (let dx = -mapRadius; dx <= mapRadius; dx++) {
+      for (let dz = -mapRadius; dz <= mapRadius; dz++) {
+        const worldX = Math.floor(playerPosition.x) + dx;
+        const worldZ = Math.floor(playerPosition.z) + dz;
+        
+        // Get height using deterministic function (works even if chunk not loaded)
+        const height = getHeight(worldX, worldZ);
         
         // Color based on height (darker = lower, lighter = higher)
         const normalizedHeight = height / 10; // Assuming max height around 10
         const greenValue = Math.floor(50 + normalizedHeight * 150);
         ctx.fillStyle = `rgb(0, ${greenValue}, 0)`;
         
-        ctx.fillRect(x * scale, z * scale, scale, scale);
+        const pixelX = centerX + dx * scale;
+        const pixelZ = centerZ + dz * scale;
+        ctx.fillRect(pixelX, pixelZ, scale, scale);
       }
     }
 
-    // Draw player position
-    const playerX = Math.floor(playerPosition.x) * scale;
-    const playerZ = Math.floor(playerPosition.z) * scale;
-    
+    // Draw player position (always at center)
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX - 1, playerZ - 1, 3, 3);
+    ctx.fillRect(centerX - 1, centerZ - 1, 3, 3);
     
     // Draw player direction indicator
     ctx.strokeStyle = 'red';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(playerX, playerZ);
+    ctx.moveTo(centerX, centerZ);
     
     // Simple direction indicator (pointing north for now)
-    ctx.lineTo(playerX, playerZ - 8);
+    ctx.lineTo(centerX, centerZ - 8);
     ctx.stroke();
 
-  }, [world, playerPosition]);
+  }, [loadedChunks, playerPosition, getHeight]);
 
   return (
     <div style={{
@@ -76,6 +81,9 @@ export default function MiniMap() {
       />
       <div style={{ color: 'white', marginTop: '5px', fontSize: '10px' }}>
         Position: {Math.floor(playerPosition.x)}, {Math.floor(playerPosition.z)}
+      </div>
+      <div style={{ color: 'white', marginTop: '5px', fontSize: '10px' }}>
+        Chunks: {loadedChunks.size}
       </div>
     </div>
   );
