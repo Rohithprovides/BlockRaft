@@ -27,7 +27,7 @@ export default function Player() {
     
     const keys = getKeys();
     const velocity = velocityRef.current;
-    const maxSpeed = 5;
+    const maxSpeed = 4.137;
     const jumpSpeed = 8;
     const damping = 0.8; // Movement damping factor
     const gravity = 20;
