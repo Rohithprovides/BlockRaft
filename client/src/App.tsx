@@ -5,12 +5,12 @@ import "@fontsource/inter";
 import MinecraftGame from "./components/MinecraftGame";
 import MiniMap from "./components/MiniMap";
 
-// Define control keys for the game
+// Define control keys for the game (using standard drei keyboard control names)
 const controls = [
   { name: "forward", keys: ["KeyW", "ArrowUp"] },
-  { name: "backward", keys: ["KeyS", "ArrowDown"] },
-  { name: "leftward", keys: ["KeyA", "ArrowLeft"] },
-  { name: "rightward", keys: ["KeyD", "ArrowRight"] },
+  { name: "back", keys: ["KeyS", "ArrowDown"] },
+  { name: "left", keys: ["KeyA", "ArrowLeft"] },
+  { name: "right", keys: ["KeyD", "ArrowRight"] },
   { name: "jump", keys: ["Space"] },
 ];
 
