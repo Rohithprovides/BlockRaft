@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
 export default function FirstPersonControls() {
   const { camera, gl } = useThree();
   const isLockedRef = useRef(false);
-  const mouseMovementRef = useRef({ x: 0, y: 0 });
+  const yawRef = useRef(0);
+  const pitchRef = useRef(0);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -22,23 +24,23 @@ export default function FirstPersonControls() {
     const handleMouseMove = (event: MouseEvent) => {
       if (!isLockedRef.current) return;
 
-      const sensitivity = 0.002;
+      // Minecraft-like sensitivity
+      const sensitivity = 0.0022;
       
-      mouseMovementRef.current.x -= event.movementX * sensitivity;
-      mouseMovementRef.current.y -= event.movementY * sensitivity;
+      // Update yaw (horizontal rotation) and pitch (vertical rotation)
+      yawRef.current -= event.movementX * sensitivity;
+      pitchRef.current -= event.movementY * sensitivity;
       
-      // Limit vertical rotation
-      mouseMovementRef.current.y = Math.max(
+      // Limit vertical rotation (pitch) to prevent flipping
+      pitchRef.current = Math.max(
         -Math.PI / 2,
-        Math.min(Math.PI / 2, mouseMovementRef.current.y)
+        Math.min(Math.PI / 2, pitchRef.current)
       );
       
-      // Apply rotation to camera
-      camera.rotation.set(
-        mouseMovementRef.current.y,
-        mouseMovementRef.current.x,
-        0
-      );
+      // Apply rotations in the correct order (like Minecraft)
+      // First apply yaw around the Y-axis, then pitch around the X-axis
+      camera.rotation.order = 'YXZ';
+      camera.rotation.set(pitchRef.current, yawRef.current, 0);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
