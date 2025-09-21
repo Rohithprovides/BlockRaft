@@ -16,12 +16,15 @@ export default function ChunkMesh({ chunkX, chunkZ, heights }: ChunkMeshProps) {
   
   // Load textures
   const grassTopTexture = useTexture("/textures/grass.png");
+  const dirtSideTexture = useTexture("/textures/dirt.png");
   
   // Configure textures
-  grassTopTexture.magFilter = THREE.NearestFilter;
-  grassTopTexture.minFilter = THREE.NearestFilter;
-  grassTopTexture.wrapS = THREE.RepeatWrapping;
-  grassTopTexture.wrapT = THREE.RepeatWrapping;
+  [grassTopTexture, dirtSideTexture].forEach(texture => {
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+  });
 
   // Create instance positions
   const { positions, count } = useMemo(() => {

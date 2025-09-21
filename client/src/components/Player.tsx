@@ -117,8 +117,9 @@ export default function Player() {
   const getGroundHeight = (x: number, z: number): number => {
     const blockX = Math.floor(x);
     const blockZ = Math.floor(z);
-    const block = getBlockAt(blockX, blockZ);
-    return block ? block : 0;
+    const blockHeight = getBlockAt(blockX, blockZ);
+    // Blocks are positioned at height + 0.5, so top surface is at height + 1
+    return blockHeight ? blockHeight + 1 : 0;
   };
 
   return null; // Player is just a camera, no visual representation needed
