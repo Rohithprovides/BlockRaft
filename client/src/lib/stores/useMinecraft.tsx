@@ -5,10 +5,17 @@ import { Vector3 } from "three";
 export const CHUNK_SIZE = 16;
 export const LOAD_RADIUS = 1; // Number of chunks to load around player (3x3 = 9 chunks, close to requested 8)
 
+export interface TreePosition {
+  x: number;
+  z: number;
+  groundHeight: number;
+}
+
 interface Chunk {
   x: number; // Chunk coordinate
   z: number; // Chunk coordinate
   heights: number[][]; // 16x16 array of height values
+  trees: TreePosition[]; // Array of tree positions in this chunk
   generated: boolean;
 }
 
@@ -26,6 +33,7 @@ interface MinecraftState {
   ensureChunksLoaded: () => void;
   worldToChunk: (x: number, z: number) => { cx: number; cz: number };
   getChunkKey: (cx: number, cz: number) => string;
+  getAllTrees: () => TreePosition[];
 }
 
 export const useMinecraft = create<MinecraftState>((set, get) => ({
@@ -78,6 +86,17 @@ export const useMinecraft = create<MinecraftState>((set, get) => ({
   
   getChunkKey: (cx: number, cz: number) => {
     return `${cx},${cz}`;
+  },
+  
+  getAllTrees: () => {
+    const state = get();
+    const allTrees: TreePosition[] = [];
+    
+    state.loadedChunks.forEach((chunk) => {
+      allTrees.push(...chunk.trees);
+    });
+    
+    return allTrees;
   },
   
   ensureChunksLoaded: () => {
@@ -153,10 +172,35 @@ function generateChunk(chunkX: number, chunkZ: number): Chunk {
     }
   }
   
+  // Generate trees for this chunk
+  const trees: TreePosition[] = [];
+  
+  // Randomly place trees with about 5% chance per chunk position
+  for (let x = 0; x < CHUNK_SIZE; x++) {
+    for (let z = 0; z < CHUNK_SIZE; z++) {
+      // Skip some positions to avoid overcrowding
+      if (x % 3 !== 0 || z % 3 !== 0) continue;
+      
+      // Random chance for tree placement
+      if (Math.random() < 0.3) { // 30% chance for trees on valid positions
+        const worldX = chunkX * CHUNK_SIZE + x;
+        const worldZ = chunkZ * CHUNK_SIZE + z;
+        const groundHeight = heights[x][z];
+        
+        trees.push({
+          x: worldX,
+          z: worldZ,
+          groundHeight: groundHeight
+        });
+      }
+    }
+  }
+  
   return {
     x: chunkX,
     z: chunkZ,
     heights,
+    trees,
     generated: true
   };
 }

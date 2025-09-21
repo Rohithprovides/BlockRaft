@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useMinecraft } from "../lib/stores/useMinecraft";
 import ChunkMesh from "./ChunkMesh";
+import Trees from "./Trees";
 
 export default function Terrain() {
   const { loadedChunks } = useMinecraft();
@@ -24,5 +25,10 @@ export default function Terrain() {
     return chunkElements;
   }, [loadedChunks]);
 
-  return <>{chunks}</>;
+  return (
+    <>
+      {chunks}
+      <Trees />
+    </>
+  );
 }
