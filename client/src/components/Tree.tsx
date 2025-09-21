@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTexture } from "@react-three/drei";
@@ -60,39 +60,28 @@ export default function Tree({ x, z, groundHeight }: TreeProps) {
     };
   }, [x, z, groundHeight]);
 
-  // Set up trunk instance matrices
-  useFrame(() => {
-    if (!trunkMeshRef.current || !trunkPositions.length) return;
-    
-    const tempMatrix = new THREE.Matrix4();
-    
-    if (!trunkMeshRef.current.userData.matricesSet) {
+  // Set up instance matrices once
+  useEffect(() => {
+    if (trunkMeshRef.current && trunkPositions.length) {
+      const tempMatrix = new THREE.Matrix4();
       trunkPositions.forEach((position, index) => {
         tempMatrix.setPosition(position.x, position.y + 0.5, position.z);
         trunkMeshRef.current!.setMatrixAt(index, tempMatrix);
       });
-      
       trunkMeshRef.current.instanceMatrix.needsUpdate = true;
-      trunkMeshRef.current.userData.matricesSet = true;
     }
-  });
+  }, [trunkPositions]);
 
-  // Set up leaves instance matrices
-  useFrame(() => {
-    if (!leavesMeshRef.current || !leavesPositions.length) return;
-    
-    const tempMatrix = new THREE.Matrix4();
-    
-    if (!leavesMeshRef.current.userData.matricesSet) {
+  useEffect(() => {
+    if (leavesMeshRef.current && leavesPositions.length) {
+      const tempMatrix = new THREE.Matrix4();
       leavesPositions.forEach((position, index) => {
         tempMatrix.setPosition(position.x, position.y + 0.5, position.z);
         leavesMeshRef.current!.setMatrixAt(index, tempMatrix);
       });
-      
       leavesMeshRef.current.instanceMatrix.needsUpdate = true;
-      leavesMeshRef.current.userData.matricesSet = true;
     }
-  });
+  }, [leavesPositions]);
 
   return (
     <>
@@ -114,10 +103,12 @@ export default function Tree({ x, z, groundHeight }: TreeProps) {
       >
         <boxGeometry args={[1, 1, 1]} />
         <meshLambertMaterial 
-          color="#2d5016" 
+          color="#4a7c59" 
           transparent={true} 
-          opacity={0.8}
-          alphaTest={0.1}
+          opacity={0.9}
+          alphaTest={0.5}
+          depthWrite={false}
+          side={THREE.DoubleSide}
         />
       </instancedMesh>
     </>
