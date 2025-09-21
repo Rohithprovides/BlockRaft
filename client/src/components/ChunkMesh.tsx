@@ -43,19 +43,26 @@ export default function ChunkMesh({ chunkX, chunkZ, heights }: ChunkMeshProps) {
     };
   }, [chunkX, chunkZ, heights]);
 
-  // Set up instance matrices
-  useMemo(() => {
-    if (!meshRef.current) return;
+  // Set up instance matrices using useFrame to ensure mesh is ready
+  useFrame(() => {
+    if (!meshRef.current || !positions.length) return;
     
     const tempMatrix = new THREE.Matrix4();
     
-    positions.forEach((position, index) => {
-      tempMatrix.setPosition(position);
-      meshRef.current!.setMatrixAt(index, tempMatrix);
-    });
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [positions]);
+    // Only update if not already updated
+    if (!meshRef.current.userData.matricesSet) {
+      console.log(`Setting matrices for chunk (${chunkX}, ${chunkZ}) with ${positions.length} instances`);
+      
+      positions.forEach((position, index) => {
+        tempMatrix.setPosition(position.x, position.y + 0.5, position.z); // Ensure blocks are above ground
+        meshRef.current!.setMatrixAt(index, tempMatrix);
+      });
+      
+      meshRef.current.instanceMatrix.needsUpdate = true;
+      meshRef.current.userData.matricesSet = true;
+      console.log(`Matrices set for chunk (${chunkX}, ${chunkZ})`);
+    }
+  });
 
   return (
     <instancedMesh
