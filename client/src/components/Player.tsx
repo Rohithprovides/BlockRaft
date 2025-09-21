@@ -9,11 +9,19 @@ export default function Player() {
   const { camera } = useThree();
   const playerRef = useRef<THREE.Mesh>(null);
   const velocityRef = useRef(new Vector3(0, 0, 0));
+  const cameraInitialized = useRef(false);
   const { playerPosition, setPlayerPosition, getBlockAt } = useMinecraft();
   
   const [subscribe, getKeys] = useKeyboardControls();
 
   useFrame((state, delta) => {
+    // Initialize camera position immediately on first frame
+    if (!cameraInitialized.current) {
+      camera.position.copy(playerPosition);
+      cameraInitialized.current = true;
+      console.log("Camera initialized at position:", playerPosition);
+    }
+    
     // Clamp delta to prevent large frame time spikes
     const clampedDelta = Math.min(delta, 1/30);
     
