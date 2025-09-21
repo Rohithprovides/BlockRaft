@@ -29,8 +29,7 @@ export default function Player() {
     const velocity = velocityRef.current;
     const maxSpeed = 4.137;
     const jumpSpeed = 8;
-    const damping = 0.8; // Movement damping factor
-    const gravity = 20;
+    const gravity = 50; // Much faster falling like Minecraft
     const playerHalfHeight = 0.8; // 1.6 blocks total height (0.8 * 2)
     
     // Debug logging for controls (as recommended)
@@ -75,10 +74,9 @@ export default function Player() {
     }
     const targetVelocity = inputVector.multiplyScalar(maxSpeed);
     
-    // Apply smooth damping to horizontal movement (exponential smoothing)
-    const dampingFactor = 1 - Math.exp(-damping * clampedDelta);
-    velocity.x = velocity.x + (targetVelocity.x - velocity.x) * dampingFactor;
-    velocity.z = velocity.z + (targetVelocity.z - velocity.z) * dampingFactor;
+    // Instant horizontal movement - no inertia like Minecraft
+    velocity.x = targetVelocity.x;
+    velocity.z = targetVelocity.z;
     
     // Check if player is grounded
     const groundHeight = getGroundHeight(playerPosition.x, playerPosition.z);
@@ -108,10 +106,8 @@ export default function Player() {
     // Update position
     setPlayerPosition(newPosition);
     
-    // Smooth camera following (optional camera smoothing)
-    const cameraSmoothing = 0.9;
-    const cameraDampingFactor = 1 - Math.exp(-cameraSmoothing * clampedDelta);
-    camera.position.lerp(newPosition, cameraDampingFactor);
+    // Instant camera following - no smoothing lag
+    camera.position.copy(newPosition);
   });
 
   const getGroundHeight = (x: number, z: number): number => {
