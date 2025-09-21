@@ -15,15 +15,12 @@ export default function Tree({ x, z, groundHeight }: TreeProps) {
   
   // Load textures
   const woodTexture = useTexture("/textures/wood_trunk.png");
-  const leavesTexture = useTexture("/textures/leaves.png");
   
-  // Configure textures
-  [woodTexture, leavesTexture].forEach(texture => {
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-  });
+  // Configure wood texture
+  woodTexture.magFilter = THREE.NearestFilter;
+  woodTexture.minFilter = THREE.NearestFilter;
+  woodTexture.wrapS = THREE.RepeatWrapping;
+  woodTexture.wrapT = THREE.RepeatWrapping;
 
   // Generate tree structure
   const { trunkPositions, leavesPositions } = useMemo(() => {
@@ -116,7 +113,12 @@ export default function Tree({ x, z, groundHeight }: TreeProps) {
         frustumCulled={true}
       >
         <boxGeometry args={[1, 1, 1]} />
-        <meshLambertMaterial map={leavesTexture} transparent={true} alphaTest={0.1} />
+        <meshLambertMaterial 
+          color="#2d5016" 
+          transparent={true} 
+          opacity={0.8}
+          alphaTest={0.1}
+        />
       </instancedMesh>
     </>
   );
