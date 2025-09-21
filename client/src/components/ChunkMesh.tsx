@@ -54,8 +54,6 @@ export default function ChunkMesh({ chunkX, chunkZ, heights }: ChunkMeshProps) {
     
     // Only update if not already updated
     if (!meshRef.current.userData.matricesSet) {
-      console.log(`Setting matrices for chunk (${chunkX}, ${chunkZ}) with ${positions.length} instances`);
-      
       positions.forEach((position, index) => {
         tempMatrix.setPosition(position.x, position.y + 0.5, position.z); // Ensure blocks are above ground
         meshRef.current!.setMatrixAt(index, tempMatrix);
@@ -63,18 +61,27 @@ export default function ChunkMesh({ chunkX, chunkZ, heights }: ChunkMeshProps) {
       
       meshRef.current.instanceMatrix.needsUpdate = true;
       meshRef.current.userData.matricesSet = true;
-      console.log(`Matrices set for chunk (${chunkX}, ${chunkZ})`);
     }
   });
+
+  // Create materials array for grass block (grass on top, dirt on sides)
+  const materials = useMemo(() => [
+    new THREE.MeshLambertMaterial({ map: dirtSideTexture }), // Right face (+X)
+    new THREE.MeshLambertMaterial({ map: dirtSideTexture }), // Left face (-X)
+    new THREE.MeshLambertMaterial({ map: grassTopTexture }), // Top face (+Y)
+    new THREE.MeshLambertMaterial({ map: dirtSideTexture }), // Bottom face (-Y)
+    new THREE.MeshLambertMaterial({ map: dirtSideTexture }), // Front face (+Z)
+    new THREE.MeshLambertMaterial({ map: dirtSideTexture })  // Back face (-Z)
+  ], [grassTopTexture, dirtSideTexture]);
 
   return (
     <instancedMesh
       ref={meshRef}
       args={[undefined, undefined, count]}
       frustumCulled={true}
+      material={materials}
     >
       <boxGeometry args={[1, 1, 1]} />
-      <meshLambertMaterial map={grassTopTexture} />
     </instancedMesh>
   );
 }
