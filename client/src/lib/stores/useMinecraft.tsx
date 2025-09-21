@@ -30,7 +30,7 @@ interface MinecraftState {
 
 export const useMinecraft = create<MinecraftState>((set, get) => ({
   loadedChunks: new Map(),
-  playerPosition: new Vector3(25, generateHeight(25, 25) + 2, 25), // Start at (25,25) ground level + 2 blocks
+  playerPosition: new Vector3(25, generateHeight(25, 25) + 1 + 0.8, 25), // Start at (25,25) on ground surface (ground + 1 block height + 0.8 player half-height)
   playerChunk: { x: 1, z: 1 }, // Chunk (1,1) contains world position (25,25)
   seed: 12345, // Deterministic seed for world generation
   

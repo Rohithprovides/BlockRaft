@@ -31,7 +31,7 @@ export default function Player() {
     const jumpSpeed = 8;
     const damping = 0.8; // Movement damping factor
     const gravity = 20;
-    const playerHalfHeight = 0.9;
+    const playerHalfHeight = 0.8; // 1.6 blocks total height (0.8 * 2)
     
     // Debug logging for controls (as recommended)
     if (keys.forward || keys.back || keys.left || keys.right || keys.jump) {
