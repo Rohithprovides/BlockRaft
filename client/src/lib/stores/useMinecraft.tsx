@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 
 // Chunk system constants
-const CHUNK_SIZE = 16;
-const LOAD_RADIUS = 3; // Number of chunks to load around player
+export const CHUNK_SIZE = 16;
+export const LOAD_RADIUS = 3; // Number of chunks to load around player
 
 interface Chunk {
   x: number; // Chunk coordinate
