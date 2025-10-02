@@ -10,7 +10,7 @@ export default function Player() {
   const playerRef = useRef<THREE.Mesh>(null);
   const velocityRef = useRef(new Vector3(0, 0, 0));
   const cameraInitialized = useRef(false);
-  const { playerPosition, setPlayerPosition, getBlockAt } = useMinecraft();
+  const { playerPosition, setPlayerPosition, getBlockAt, getAllTrees } = useMinecraft();
   
   const [subscribe, getKeys] = useKeyboardControls();
 
@@ -94,6 +94,32 @@ export default function Player() {
     const newPosition = playerPosition.clone();
     newPosition.add(velocity.clone().multiplyScalar(clampedDelta));
     
+    // Check tree collision - if colliding, don't move horizontally
+    if (checkTreeCollision(newPosition.x, newPosition.z, newPosition.y)) {
+      // Try moving only on X axis
+      const testX = playerPosition.clone();
+      testX.x = newPosition.x;
+      testX.y = newPosition.y;
+      
+      // Try moving only on Z axis
+      const testZ = playerPosition.clone();
+      testZ.z = newPosition.z;
+      testZ.y = newPosition.y;
+      
+      // Use whichever direction doesn't collide
+      if (!checkTreeCollision(testX.x, testX.z, testX.y)) {
+        newPosition.x = testX.x;
+        newPosition.z = playerPosition.z;
+      } else if (!checkTreeCollision(testZ.x, testZ.z, testZ.y)) {
+        newPosition.x = playerPosition.x;
+        newPosition.z = testZ.z;
+      } else {
+        // Both directions blocked, don't move horizontally
+        newPosition.x = playerPosition.x;
+        newPosition.z = playerPosition.z;
+      }
+    }
+    
     // Collision detection and ground constraint
     const newGroundHeight = getGroundHeight(newPosition.x, newPosition.z);
     const currentGroundHeight = getGroundHeight(playerPosition.x, playerPosition.z);
@@ -129,6 +155,31 @@ export default function Player() {
     // Blocks are positioned at height + 0.5, so top surface is at height + 1
     // Use !== null check to handle zero height correctly
     return blockHeight !== null ? blockHeight + 1 : 0;
+  };
+
+  const checkTreeCollision = (x: number, z: number, y: number): boolean => {
+    const trees = getAllTrees();
+    const playerRadius = 0.3; // Player collision radius
+    
+    for (const tree of trees) {
+      // Check horizontal distance to tree trunk center (trees are centered at x+0.5, z+0.5)
+      const treeCenterX = tree.x + 0.5;
+      const treeCenterZ = tree.z + 0.5;
+      const dx = x - treeCenterX;
+      const dz = z - treeCenterZ;
+      const distance = Math.sqrt(dx * dx + dz * dz);
+      
+      // Tree trunk height is 4-6 blocks, check if player is at tree height
+      const trunkTop = tree.groundHeight + 7; // Max trunk height + buffer
+      const trunkBottom = tree.groundHeight + 1;
+      
+      // If player is within tree trunk radius and at trunk height, collision detected
+      if (distance < playerRadius + 0.5 && y >= trunkBottom && y <= trunkTop) {
+        return true;
+      }
+    }
+    
+    return false;
   };
 
   return null; // Player is just a camera, no visual representation needed
