@@ -172,26 +172,44 @@ function generateChunk(chunkX: number, chunkZ: number): Chunk {
     }
   }
   
-  // Generate trees for this chunk
+  // Generate trees for this chunk - spaced 7-14 blocks apart for plains biome
   const trees: TreePosition[] = [];
   
-  // Randomly place trees with about 5% chance per chunk position
+  // Use a sparse grid to place trees with random spacing
   for (let x = 0; x < CHUNK_SIZE; x++) {
     for (let z = 0; z < CHUNK_SIZE; z++) {
-      // Skip some positions to avoid overcrowding
-      if (x % 3 !== 0 || z % 3 !== 0) continue;
+      const worldX = chunkX * CHUNK_SIZE + x;
+      const worldZ = chunkZ * CHUNK_SIZE + z;
       
-      // Random chance for tree placement
-      if (Math.random() < 0.3) { // 30% chance for trees on valid positions
-        const worldX = chunkX * CHUNK_SIZE + x;
-        const worldZ = chunkZ * CHUNK_SIZE + z;
-        const groundHeight = heights[x][z];
+      // Only check positions on a sparse grid (every 10 blocks)
+      if (worldX % 10 !== 0 || worldZ % 10 !== 0) continue;
+      
+      // Use deterministic random based on world position
+      const seed = worldX * 73856093 ^ worldZ * 19349663;
+      const random = Math.abs(Math.sin(seed)) * 1000 % 1;
+      
+      // Low chance for tree placement (about 15% on grid points)
+      if (random < 0.15) {
+        // Add random offset to vary spacing between 7-14 blocks
+        const offsetX = Math.floor(Math.abs(Math.sin(seed * 1.1)) * 7); // 0-6 offset
+        const offsetZ = Math.floor(Math.abs(Math.sin(seed * 1.3)) * 7); // 0-6 offset
         
-        trees.push({
-          x: worldX,
-          z: worldZ,
-          groundHeight: groundHeight
-        });
+        const finalX = worldX + offsetX;
+        const finalZ = worldZ + offsetZ;
+        
+        // Calculate if this position is within this chunk
+        if (finalX >= chunkX * CHUNK_SIZE && finalX < (chunkX + 1) * CHUNK_SIZE &&
+            finalZ >= chunkZ * CHUNK_SIZE && finalZ < (chunkZ + 1) * CHUNK_SIZE) {
+          const localX = finalX - chunkX * CHUNK_SIZE;
+          const localZ = finalZ - chunkZ * CHUNK_SIZE;
+          const groundHeight = heights[localX][localZ];
+          
+          trees.push({
+            x: finalX,
+            z: finalZ,
+            groundHeight: groundHeight
+          });
+        }
       }
     }
   }
