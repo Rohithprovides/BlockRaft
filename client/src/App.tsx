@@ -200,6 +200,39 @@ function App() {
       
       {/* Render MiniMap as HTML overlay outside the Canvas */}
       <MiniMap />
+      
+      {/* Minecraft-style crosshair */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        pointerEvents: 'none',
+        zIndex: 1000
+      }}>
+        {/* Vertical line */}
+        <div style={{
+          position: 'absolute',
+          width: '2px',
+          height: '12px',
+          backgroundColor: 'white',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          boxShadow: '0 0 2px rgba(0,0,0,0.8)'
+        }} />
+        {/* Horizontal line */}
+        <div style={{
+          position: 'absolute',
+          width: '12px',
+          height: '2px',
+          backgroundColor: 'white',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          boxShadow: '0 0 2px rgba(0,0,0,0.8)'
+        }} />
+      </div>
     </div>
   );
 }
